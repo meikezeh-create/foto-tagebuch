@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Foto-Tagebuch</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui, -apple-system, BlinkMacSystemFont;
+      background:#f6e3e7;
+      color:#3a2a27;
+      display:flex;
+      height:100vh;
+    }
+
+    aside{
+      width:220px;
+      background:#efd2d8;
+      padding:20px;
+      overflow-y:auto;
+      border-right:1px solid #d9b3ba;
+    }
+
+    aside div{
+      margin-bottom:12px;
+      cursor:pointer;
+      color:#7b4b50;
+    }
+
+    aside div.active{
+      font-weight:bold;
+      text-decoration:underline;
+    }
+
+    main{
+      flex:1;
+      padding:30px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    img{
+      max-width:90%;
+      max-height:70vh;
+      border-radius:18px;
+      display:none;
+      margin-top:20px;
+    }
+
+    input, button{
+      margin-top:10px;
+      padding:10px;
+      border-radius:12px;
+      border:1px solid #c9a0a6;
+      background:white;
+      font-size:15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<aside id="dates"></aside>
+
+<main>
+  <h2>Foto hochladen</h2>
+
+  <input type="date" id="dateInput"/>
+  <input type="file" id="fileInput" accept="image/*"/>
+  <button onclick="upload()">Speichern</button>
+
+  <img id="preview"/>
+</main>
+
+<script>
+const SUPABASE_URL = "https://okvhllwikukexdggrfbg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_dm8ukyTUhoUTHwoLTVe-OHQ_I_UCOAKl";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const datesBox = document.getElementById("dates");
+const preview = document.getElementById("preview");
+
+async function loadDates(){
+  const { data } = await sb
+    .from("entries")
+    .select("entry_date")
+    .order("entry_date", { ascending:false });
+
+  const unique = [...new Set(data.map(d => d.entry_date))];
+  datesBox.innerHTML = "";
+
+  unique.forEach(date=>{
+    const d = document.createElement("div");
+    d.textContent = date;
+    d.onclick = ()=>loadImage(date, d);
+    datesBox.appendChild(d);
+  });
+}
+
+async function loadImage(date, el){
+  document.querySelectorAll("aside div").forEach(e=>e.classList.remove("active"));
+  el.classList.add("active");
+
+  const { data } = await sb
+    .from("entries")
+    .select("file_path")
+    .eq("entry_date", date)
+    .limit(1)
+    .single();
+
+  if(!data) return;
+
+  const { data:url } = sb.storage.from("photos").getPublicUrl(data.file_path);
+  preview.src = url.publicUrl;
+  preview.style.display = "block";
+}
+
+async function upload(){
+  const date = document.getElementById("dateInput").value;
+  const file = document.getElementById("fileInput").files[0];
+  if(!date || !file) return alert("Datum und Foto auswählen");
+
+  const path = `${date}/${Date.now()}_${file.name}`;
+
+  await sb.storage.from("photos").upload(path, file);
+
+  await sb.from("entries").insert({
+    entry_date: date,
+    slot: 1,
+    file_path: path
+  });
+
+  loadDates();
+}
+
+loadDates();
+</script>
+
+</body>
+</html>
