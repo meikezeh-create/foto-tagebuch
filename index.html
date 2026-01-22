@@ -5,586 +5,670 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Foto-Tagebuch</title>
 
-  <!-- Supabase JS (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --accent:#2563eb;
-      --accent2:#16a34a;
-      --danger:#dc2626;
-      --shadow:0 8px 24px rgba(0,0,0,.08);
-      --radius:16px;
+      --bg: #fff7f5;          /* rosé/weiß */
+      --panel: #ffffff;
+      --ink: #2a1c18;         /* braun */
+      --muted: #6a514a;       /* warmes braun */
+      --rose: #e9b6c2;        /* rosa */
+      --rose2:#f3d1d9;        /* hellrosa */
+      --sand:#f0e6e2;         /* warmes weiß */
+      --line:#ead9d4;
+      --shadow: 0 10px 25px rgba(42,28,24,.08);
+      --radius: 18px;
     }
-    *{box-sizing:border-box}
+
+    *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--text);
-      background:linear-gradient(180deg, #eef2ff 0%, var(--bg) 25%, var(--bg) 100%);
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(233,182,194,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(240,230,226,.8), transparent 60%),
+        var(--bg);
+      min-height:100vh;
     }
 
     header{
-      position:sticky; top:0; z-index:5;
-      backdrop-filter: blur(10px);
-      background:rgba(246,247,251,.75);
-      border-bottom:1px solid var(--line);
-    }
-    .header-inner{
-      max-width:1100px;
-      margin:0 auto;
-      padding:14px 16px;
+      padding:20px 18px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:800;
-    }
-    .dot{
-      width:12px;height:12px;border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(37,99,235,.12);
-    }
-    .sub{
-      font-size:12px;color:var(--muted);font-weight:600;
+      max-width:1200px;
+      margin:0 auto;
     }
 
-    main{
-      max-width:1100px;
+    .brand{
+      display:flex; align-items:baseline; gap:10px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+    .brand .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.75);
+      color:var(--muted);
+    }
+
+    .wrap{
+      max-width:1200px;
       margin:0 auto;
-      padding:18px 16px 28px;
+      padding:0 18px 22px;
+    }
+
+    .grid{
       display:grid;
       grid-template-columns: 320px 1fr;
       gap:16px;
     }
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
     }
 
+    .card{
+      background:rgba(255,255,255,.78);
+      backdrop-filter: blur(8px);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-head{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(243,209,217,.65), rgba(255,255,255,0));
+    }
+    .card-head h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    /* Upload area */
     .upload{
       padding:14px;
+      display:grid;
+      gap:10px;
     }
-    .upload h2{
-      margin:0 0 10px;
-      font-size:16px;
-    }
+
     label{
-      display:block;
       font-size:12px;
       color:var(--muted);
-      font-weight:700;
-      margin:10px 0 6px;
+      display:block;
+      margin-bottom:6px;
     }
-    input[type="date"], input[type="text"], input[type="file"]{
+
+    input[type="date"], input[type="number"], input[type="file"]{
       width:100%;
+      padding:10px 12px;
       border:1px solid var(--line);
       border-radius:12px;
-      padding:10px 12px;
-      font-size:14px;
-      background:#fff;
+      background:rgba(255,255,255,.9);
+      color:var(--ink);
       outline:none;
     }
-    input[type="file"]{
-      padding:10px;
-    }
+
     .row{
-      display:flex;
+      display:grid;
+      grid-template-columns: 1fr 120px;
       gap:10px;
-      align-items:center;
-      margin-top:12px;
     }
-    button{
-      border:0;
-      border-radius:12px;
-      padding:10px 12px;
-      font-weight:800;
+    @media (max-width: 900px){
+      .row{ grid-template-columns: 1fr; }
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius: 14px;
+      padding:10px 14px;
       cursor:pointer;
-      font-size:14px;
+      font-weight:600;
+      color:var(--ink);
+      background: linear-gradient(180deg, var(--rose2), var(--rose));
+      box-shadow: 0 10px 18px rgba(233,182,194,.35);
+      transition: transform .06s ease, filter .15s ease;
     }
-    .btn-primary{
-      background:var(--accent);
-      color:white;
-      flex:1;
-    }
-    .btn-secondary{
-      background:#eef2ff;
-      color:#1e40af;
-    }
-    .btn-primary:disabled{
-      opacity:.55; cursor:not-allowed;
+    .btn:active{ transform: translateY(1px); }
+    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.7); }
+
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
     }
 
     .status{
-      margin-top:10px;
+      font-size:12px;
       padding:10px 12px;
       border-radius:12px;
-      font-size:13px;
-      background:#f9fafb;
-      border:1px dashed var(--line);
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.8);
       color:var(--muted);
-      white-space:pre-wrap;
     }
-    .status.ok{border-style:solid;background:#ecfdf5;color:#065f46;border-color:#bbf7d0}
-    .status.err{border-style:solid;background:#fef2f2;color:#7f1d1d;border-color:#fecaca}
+    .status.ok{ border-color: rgba(60,160,120,.35); color:#2a6b52; }
+    .status.err{ border-color: rgba(220,80,80,.35); color:#8f2f2f; }
 
-    .sidebar{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
+    /* Left list */
     .list{
-      padding:12px;
-    }
-    .list h3{
-      margin:0 0 10px;
-      font-size:14px;
-      color:var(--muted);
-      letter-spacing:.2px;
-    }
-    .items{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      max-height:55vh;
+      padding:10px;
+      max-height: calc(100vh - 240px);
       overflow:auto;
-      padding-right:4px;
     }
     .item{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:12px;
-      padding:10px 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      padding:10px 12px;
+      border:1px solid transparent;
+      border-radius:14px;
       cursor:pointer;
-      transition:.12s transform, .12s box-shadow, .12s border-color;
+      user-select:none;
     }
     .item:hover{
-      transform:translateY(-1px);
-      box-shadow:0 10px 18px rgba(0,0,0,.06);
-      border-color:#c7d2fe;
+      background: rgba(243,209,217,.35);
+      border-color: rgba(233,182,194,.35);
     }
     .item.active{
-      border-color:rgba(37,99,235,.55);
-      box-shadow:0 10px 18px rgba(37,99,235,.12);
+      background: rgba(233,182,194,.45);
+      border-color: rgba(233,182,194,.65);
     }
-    .date{
-      font-weight:900;
+    .item .date{
+      font-weight:700;
       font-size:14px;
     }
-    .meta{
+    .item .meta{
       font-size:12px;
       color:var(--muted);
-      font-weight:700;
+      white-space:nowrap;
     }
 
-    .viewer{
-      padding:14px;
-      min-height: 540px;
+    /* Right preview */
+    .preview{
+      min-height: 520px;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .preview-top{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
       display:flex;
-      flex-direction:column;
-      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(240,230,226,.8), rgba(255,255,255,0));
     }
-    .viewer h2{
+    .preview-top h3{
       margin:0;
-      font-size:16px;
+      font-size:18px;
     }
+    .preview-top .sub{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
     .frame{
-      flex:1;
-      border:1px dashed var(--line);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg,#ffffff 0%, #fafafa 100%);
+      padding:14px;
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
       position:relative;
     }
-    .frame img{
-      max-width:100%;
-      max-height:100%;
-      object-fit:contain;
-      display:none;
-    }
-    .placeholder{
+    .frame .empty{
+      border:1px dashed rgba(106,81,74,.35);
+      border-radius: var(--radius);
+      width:100%;
+      height:100%;
+      min-height:420px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      color:var(--muted);
+      background: rgba(255,255,255,.55);
       text-align:center;
-      padding:20px;
-      color:var(--muted);
-      font-weight:700;
-      line-height:1.35;
-    }
-    .small{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:700;
+      line-height:1.4;
     }
 
-    @media (max-width: 900px){
-      main{grid-template-columns:1fr}
-      .items{max-height:260px}
-      .viewer{min-height:420px}
+    img#mainImage{
+      max-width:100%;
+      max-height:520px;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      box-shadow: var(--shadow);
+      display:none;
+      background:#fff;
     }
+
+    .thumbs{
+      padding: 0 14px 14px;
+      display:flex;
+      gap:10px;
+      overflow:auto;
+    }
+    .thumb{
+      flex: 0 0 auto;
+      width:84px;
+      height:84px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.7);
+      cursor:pointer;
+      object-fit:cover;
+      box-shadow: 0 8px 18px rgba(42,28,24,.06);
+    }
+    .thumb.active{
+      outline: 3px solid rgba(233,182,194,.8);
+    }
+
+    .footer{
+      padding:10px 14px 14px;
+      border-top:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
   </style>
+
+  <!-- Supabase JS (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-<header>
-  <div class="header-inner">
-    <div>
-      <div class="brand"><span class="dot"></span> Foto-Tagebuch</div>
-      <div class="sub">Datum speichern → links auswählen → Foto rechts ansehen</div>
+  <header>
+    <div class="brand">
+      <h1>Foto-Tagebuch</h1>
+      <div class="tag">braun · rosé · rosa · weiß</div>
     </div>
-    <div class="sub" id="connState">Verbinden…</div>
-  </div>
-</header>
-
-<main>
-  <div class="sidebar">
-    <section class="card upload">
-      <h2>Foto hochladen</h2>
-
-      <label for="entryDate">Datum</label>
-      <input id="entryDate" type="date" />
-
-      <label for="photoFile">Foto auswählen</label>
-      <input id="photoFile" type="file" accept="image/*" />
-
-      <div class="row">
-        <button id="saveBtn" class="btn-primary">Speichern</button>
-        <button id="refreshBtn" class="btn-secondary" title="Liste neu laden">↻</button>
-      </div>
-
-      <div id="status" class="status">Hinweis: Damit Fotos nach Reload bleiben, müssen sie in Supabase Storage gespeichert werden (nicht nur lokal im Browser).</div>
-    </section>
-
-    <section class="card list">
-      <h3>Gespeicherte Daten</h3>
-      <div class="items" id="items"></div>
-      <div class="small" id="countInfo" style="margin-top:10px;"></div>
-    </section>
-  </div>
-
-  <section class="card viewer">
-    <h2 id="viewerTitle">Foto anzeigen</h2>
-    <div class="frame">
-      <div class="placeholder" id="placeholder">
-        Wähle links ein Datum aus.<br/>
-        Danach wird hier das gespeicherte Foto angezeigt.
-      </div>
-      <img id="img" alt="Gespeichertes Foto" />
+    <div class="mono" style="font-size:12px;color:var(--muted);">
+      Supabase verbunden
     </div>
-    <div class="small" id="viewerMeta"></div>
-  </section>
-</main>
+  </header>
 
-<script>
-  /***********************
-   * 1) SUPABASE CONFIG  *
-   ***********************/
-  // Deine Daten (wie du sie geschickt hast)
-  const SUPABASE_URL = "https://okvhllwikukexdggrfbg.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_dm8ukyTUhoUTHwoLTVe-OHQ_I_UCOAKl";
-
-  // Bucket- und Tabellennamen
-  const BUCKET = "photos";
-  const TABLE  = "entries";
-
-  // Spalten in deiner Tabelle (angepasst an das, was man bei dir gesehen hat)
-  // Required: entry_date (text), file_path (text), slot (int4 optional)
-  const COL_ENTRY_DATE = "entry_date";
-  const COL_FILE_PATH  = "file_path";
-  const COL_CREATED_AT = "created_at";
-  const COL_SLOT       = "slot";
-
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  /***********************
-   * 2) UI ELEMENTS      *
-   ***********************/
-  const elDate = document.getElementById("entryDate");
-  const elFile = document.getElementById("photoFile");
-  const elSave = document.getElementById("saveBtn");
-  const elRefresh = document.getElementById("refreshBtn");
-  const elStatus = document.getElementById("status");
-  const elItems = document.getElementById("items");
-  const elCount = document.getElementById("countInfo");
-  const elImg = document.getElementById("img");
-  const elPlaceholder = document.getElementById("placeholder");
-  const elViewerTitle = document.getElementById("viewerTitle");
-  const elViewerMeta = document.getElementById("viewerMeta");
-  const elConn = document.getElementById("connState");
-
-  function setStatus(msg, type="") {
-    elStatus.className = "status" + (type ? " " + type : "");
-    elStatus.textContent = msg;
-  }
-
-  function toISODate(d) {
-    // YYYY-MM-DD
-    const pad = (n) => String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-
-  // Standard: Heute
-  elDate.value = toISODate(new Date());
-
-  /***********************
-   * 3) DATA LOADING      *
-   ***********************/
-  // Wir laden alles aus entries, gruppieren nach entry_date und zeigen links nur die Daten
-  let grouped = []; // [{ entry_date, latest, count, items:[...] }]
-
-  async function pingConnection() {
-    // Einfacher "Ping": 1 Zeile aus Tabelle versuchen zu lesen.
-    const { error } = await supabase.from(TABLE).select("id").limit(1);
-    elConn.textContent = error ? "Nicht verbunden" : "Verbunden";
-  }
-
-  async function loadEntries() {
-    setStatus("Lade Einträge…");
-    elItems.innerHTML = "";
-    elCount.textContent = "";
-
-    // Wir holen alle Einträge (neuste zuerst)
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select("*")
-      .order(COL_CREATED_AT, { ascending: false });
-
-    if (error) {
-      setStatus(
-        "Fehler beim Laden aus der Tabelle 'entries'.\n\n" +
-        "Sehr wahrscheinlich blockiert eine Policy (RLS).\n\n" +
-        "Fehlermeldung:\n" + error.message,
-        "err"
-      );
-      return;
-    }
-
-    // Gruppieren nach Datum
-    const map = new Map();
-    (data || []).forEach(row => {
-      const d = row[COL_ENTRY_DATE] || "Unbekannt";
-      if (!map.has(d)) map.set(d, []);
-      map.get(d).push(row);
-    });
-
-    grouped = Array.from(map.entries())
-      .map(([entry_date, items]) => ({
-        entry_date,
-        items,
-        count: items.length,
-        latest: items[0] // weil oben nach created_at desc sortiert
-      }))
-      // sortieren nach Datum (desc)
-      .sort((a,b) => (a.entry_date < b.entry_date ? 1 : -1));
-
-    if (grouped.length === 0) {
-      setStatus("Noch keine Einträge. Lade ein Foto hoch und klicke auf Speichern.", "");
-      elCount.textContent = "0 Einträge";
-      return;
-    }
-
-    renderList();
-    setStatus("Einträge geladen.", "ok");
-    elCount.textContent = `${data.length} Einträge, ${grouped.length} Daten`;
-  }
-
-  function renderList(activeDate=null) {
-    elItems.innerHTML = "";
-    grouped.forEach(group => {
-      const div = document.createElement("div");
-      div.className = "item" + (activeDate === group.entry_date ? " active" : "");
-      div.innerHTML = `
-        <div>
-          <div class="date">${group.entry_date}</div>
-          <div class="meta">${group.count} Foto(s)</div>
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT: Upload + Date list -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Foto speichern</h2>
         </div>
-        <div class="meta">›</div>
-      `;
-      div.addEventListener("click", () => {
-        // Markieren
-        [...elItems.querySelectorAll(".item")].forEach(x => x.classList.remove("active"));
-        div.classList.add("active");
-        showGroup(group);
-      });
-      elItems.appendChild(div);
-    });
-  }
 
-  /***********************
-   * 4) IMAGE DISPLAY     *
-   ***********************/
-  async function getDisplayUrl(filePath) {
-    // 1) Versuch: Public URL (Bucket ist public)
-    const pub = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-    if (pub?.data?.publicUrl) return pub.data.publicUrl;
+        <div class="upload">
+          <div>
+            <label for="entryDate">Datum</label>
+            <input id="entryDate" type="date" />
+          </div>
 
-    // 2) Fallback: Signed URL (wenn Bucket privat ist)
-    // Hinweis: Signed URLs laufen ab – du kannst sie aber bei jedem Laden neu erzeugen.
-    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 Tage
-    if (error) throw error;
-    return data.signedUrl;
-  }
+          <div class="row">
+            <div>
+              <label for="fileInput">Foto auswählen</label>
+              <input id="fileInput" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label for="slotInput">Slot (optional)</label>
+              <input id="slotInput" type="number" min="1" step="1" placeholder="1" />
+            </div>
+          </div>
 
-  async function showGroup(group) {
-    const row = group.latest;
-    const filePath = row[COL_FILE_PATH];
+          <button id="saveBtn" class="btn">Speichern</button>
 
-    elViewerTitle.textContent = `Foto: ${group.entry_date}`;
-    elViewerMeta.textContent = "Lade Foto…";
-    elPlaceholder.style.display = "block";
-    elImg.style.display = "none";
+          <div id="statusBox" class="status">
+            Tipp: Datum auswählen → Foto wählen → Speichern. Danach erscheint links das Datum.
+          </div>
 
-    try {
-      const url = await getDisplayUrl(filePath);
-      elImg.src = url;
-      elImg.onload = () => {
-        elPlaceholder.style.display = "none";
-        elImg.style.display = "block";
-      };
-      elImg.onerror = () => {
-        elPlaceholder.style.display = "block";
-        elImg.style.display = "none";
-        elViewerMeta.textContent = "Konnte das Bild nicht laden (URL/Policy/Bucket prüfen).";
-      };
+          <div class="hint">
+            Hinweis: Damit „ohne Login“ Upload & Abruf funktionieren, müssen in Supabase
+            <b>RLS-Policies</b> für <span class="mono">entries</span> sowie Storage-Policies für den Bucket
+            <span class="mono">photos</span> das <b>SELECT</b> und <b>INSERT</b> für <b>public/anon</b> erlauben.
+          </div>
+        </div>
 
-      const created = row[COL_CREATED_AT] ? new Date(row[COL_CREATED_AT]).toLocaleString() : "";
-      elViewerMeta.textContent = `Pfad: ${filePath} • gespeichert: ${created}`;
-    } catch (e) {
-      elPlaceholder.style.display = "block";
-      elImg.style.display = "none";
-      elViewerMeta.textContent =
-        "Fehler beim Erzeugen der Bild-URL.\n" +
-        (e?.message || String(e));
+        <div class="card-head" style="border-top:1px solid var(--line);">
+          <h2>Gespeicherte Tage</h2>
+        </div>
+
+        <div id="dateList" class="list">
+          <div class="status">Lade Einträge …</div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Preview -->
+      <section class="card preview">
+        <div class="preview-top">
+          <div>
+            <h3 id="previewTitle">Kein Datum ausgewählt</h3>
+            <div id="previewSub" class="sub">Wähle links ein Datum, um das Foto zu sehen.</div>
+          </div>
+          <div class="mono" id="countBadge" style="font-size:12px;color:var(--muted);"></div>
+        </div>
+
+        <div class="frame">
+          <div id="emptyBox" class="empty">
+            Hier erscheint das Foto.<br />
+            (Nicht der Dateiname.)
+          </div>
+          <img id="mainImage" alt="Foto" />
+        </div>
+
+        <div id="thumbs" class="thumbs" style="display:none;"></div>
+
+        <div class="footer">
+          <div>Bucket: <span class="mono">photos</span> · Tabelle: <span class="mono">entries</span></div>
+          <div id="lastSync">—</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ==========================
+    // 1) Supabase Konfiguration
+    // ==========================
+    const SUPABASE_URL = "https://okvhllwikukexdggrfbg.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_dm8ukyTUhoUTHwoLTVe-OHQ_I_UCOAKl";
+
+    const BUCKET = "photos";
+    const TABLE  = "entries";
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ==========================
+    // 2) UI Helpers
+    // ==========================
+    const $ = (id) => document.getElementById(id);
+
+    const statusBox = $("statusBox");
+    function setStatus(msg, kind=""){
+      statusBox.className = "status" + (kind ? " " + kind : "");
+      statusBox.textContent = msg;
     }
-  }
 
-  /***********************
-   * 5) UPLOAD + SAVE     *
-   ***********************/
-  function sanitizeFilename(name) {
-    // iOS Dateinamen/Leerzeichen entschärfen
-    return name
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9.\-_]/g, "");
-  }
-
-  async function saveEntry() {
-    const entryDate = elDate.value;
-    const file = elFile.files && elFile.files[0];
-
-    if (!entryDate) {
-      setStatus("Bitte ein Datum auswählen.", "err");
-      return;
-    }
-    if (!file) {
-      setStatus("Bitte ein Foto auswählen.", "err");
-      return;
+    function toDEDate(yyyy_mm_dd){
+      // input date from <input type="date"> is "YYYY-MM-DD"
+      if(!yyyy_mm_dd) return "";
+      const [y,m,d] = yyyy_mm_dd.split("-");
+      return `${d}.${m}.${y}`;
     }
 
-    elSave.disabled = true;
-    setStatus("Speichere…");
+    function nowDE(){
+      return new Date().toLocaleString("de-DE");
+    }
 
-    try {
-      // 1) Upload in Storage
-      const safeName = sanitizeFilename(file.name || "foto.jpg");
-      const filePath = `${entryDate}/${Date.now()}-${safeName}`;
+    function safeFileExt(file){
+      const name = file.name || "";
+      const dot = name.lastIndexOf(".");
+      if(dot > -1) return name.slice(dot).toLowerCase();
+      // fallback by mime
+      if(file.type === "image/png") return ".png";
+      if(file.type === "image/webp") return ".webp";
+      if(file.type === "image/gif") return ".gif";
+      return ".jpg";
+    }
 
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type || "image/jpeg"
-        });
+    function randomId(){
+      // browser-safe small uid
+      return (crypto?.randomUUID?.() || ("id_" + Math.random().toString(16).slice(2) + Date.now()));
+    }
 
-      if (upErr) {
-        setStatus(
-          "Upload in Supabase Storage fehlgeschlagen.\n\n" +
-          "Sehr wahrscheinlich blockiert eine Storage-Policy (insert).\n\n" +
-          "Fehlermeldung:\n" + upErr.message,
-          "err"
-        );
-        return;
-      }
+    // ==========================
+    // 3) Laden / Anzeigen
+    // ==========================
+    let allRows = [];
+    let activeDate = null;
 
-      // 2) Eintrag in Tabelle 'entries' speichern
-      // Wichtig: file_path darf bei dir nicht NULL sein (das hattest du als Fehlermeldung).
-      const payload = {
-        [COL_ENTRY_DATE]: entryDate,
-        [COL_FILE_PATH]: filePath,
-        [COL_SLOT]: 1
-      };
-
-      const { error: dbErr } = await supabase
+    async function fetchEntries(){
+      // liest Daten aus der Tabelle entries
+      const { data, error } = await supabaseClient
         .from(TABLE)
-        .insert(payload);
+        .select("id, entry_date, slot, file_path, created_at")
+        .order("entry_date", { ascending: false })
+        .order("slot", { ascending: true })
+        .order("created_at", { ascending: false });
 
-      if (dbErr) {
-        setStatus(
-          "Eintrag in der Tabelle 'entries' konnte nicht gespeichert werden.\n\n" +
-          "Sehr wahrscheinlich blockiert eine Tabelle-Policy (RLS insert).\n\n" +
-          "Fehlermeldung:\n" + dbErr.message,
-          "err"
-        );
+      if(error){
+        setStatus("Fehler beim Laden aus Supabase: " + error.message, "err");
+        $("dateList").innerHTML = `<div class="status err">Konnte Einträge nicht laden. Prüfe RLS-Policies in der Tabelle <span class="mono">entries</span> (SELECT für public/anon).</div>`;
         return;
       }
 
-      setStatus("Gespeichert. Liste wird aktualisiert…", "ok");
-      elFile.value = "";
-      await loadEntries();
-
-      // automatisch das gespeicherte Datum anzeigen
-      const group = grouped.find(g => g.entry_date === entryDate);
-      if (group) {
-        renderList(entryDate);
-        showGroup(group);
+      allRows = data || [];
+      renderDateList();
+      $("lastSync").textContent = "Letzte Aktualisierung: " + nowDE();
+      if(allRows.length === 0){
+        setStatus("Noch keine Einträge gespeichert.", "");
+      } else {
+        setStatus("Bereit. Einträge geladen.", "ok");
       }
-    } finally {
-      elSave.disabled = false;
+
+      // wenn aktives Datum noch existiert: neu anzeigen
+      if(activeDate){
+        showDate(activeDate);
+      }
     }
-  }
 
-  /***********************
-   * 6) EVENTS + INIT     *
-   ***********************/
-  elSave.addEventListener("click", saveEntry);
-  elRefresh.addEventListener("click", loadEntries);
+    function groupByDate(rows){
+      const map = new Map();
+      for(const r of rows){
+        const key = r.entry_date || "ohne_datum";
+        if(!map.has(key)) map.set(key, []);
+        map.get(key).push(r);
+      }
+      return map;
+    }
 
-  (async function init(){
-    await pingConnection();
-    await loadEntries();
-  })();
+    function renderDateList(){
+      const list = $("dateList");
+      const grouped = groupByDate(allRows);
 
-  /********************************************************************
-   * WICHTIG (damit es "dauerhaft" ist)
-   *
-   * Wenn nach Reload nichts bleibt, liegt es fast immer an Policies:
-   *
-   * A) Tabelle entries: braucht SELECT + INSERT (für die Website)
-   * B) Storage Bucket photos: braucht SELECT (read) + INSERT (upload)
-   *
-   * Wenn du KEIN Login verwendest, müssen diese Aktionen für "public"
-   * erlaubt sein. Wenn du "authenticated only" eingestellt hast,
-   * kann die Website ohne Login nichts speichern.
-   ********************************************************************/
-</script>
+      if(grouped.size === 0){
+        list.innerHTML = `<div class="status">Noch nichts gespeichert. 😊</div>`;
+        return;
+      }
+
+      list.innerHTML = "";
+      for(const [date, rows] of grouped.entries()){
+        const div = document.createElement("div");
+        div.className = "item" + (date === activeDate ? " active" : "");
+        div.onclick = () => showDate(date);
+
+        const left = document.createElement("div");
+        left.innerHTML = `<div class="date">${date}</div>`;
+
+        const right = document.createElement("div");
+        right.className = "meta";
+        right.textContent = rows.length + (rows.length === 1 ? " Foto" : " Fotos");
+
+        div.appendChild(left);
+        div.appendChild(right);
+        list.appendChild(div);
+      }
+    }
+
+    function publicUrlForPath(path){
+      // bucket ist PUBLIC -> wir können Public URL nehmen
+      const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
+      return data?.publicUrl || "";
+    }
+
+    function showDate(date){
+      activeDate = date;
+      renderDateList();
+
+      const rows = allRows.filter(r => (r.entry_date || "ohne_datum") === date);
+      $("previewTitle").textContent = date;
+      $("previewSub").textContent = rows.length ? "Klicke ein Vorschaubild (falls mehrere)." : "Keine Fotos für dieses Datum.";
+      $("countBadge").textContent = rows.length ? `${rows.length} Datei(en)` : "";
+
+      if(!rows.length){
+        $("mainImage").style.display = "none";
+        $("emptyBox").style.display = "flex";
+        $("thumbs").style.display = "none";
+        $("thumbs").innerHTML = "";
+        return;
+      }
+
+      const thumbs = $("thumbs");
+      thumbs.innerHTML = "";
+      thumbs.style.display = rows.length > 1 ? "flex" : "none";
+
+      // Main image = erstes Foto
+      setMainImage(rows[0].file_path);
+
+      rows.forEach((r, idx) => {
+        const url = publicUrlForPath(r.file_path);
+        const img = document.createElement("img");
+        img.className = "thumb" + (idx === 0 ? " active" : "");
+        img.src = url;
+        img.alt = date;
+        img.onclick = () => {
+          // set active thumb
+          [...thumbs.querySelectorAll(".thumb")].forEach(t => t.classList.remove("active"));
+          img.classList.add("active");
+          setMainImage(r.file_path);
+        };
+        thumbs.appendChild(img);
+      });
+    }
+
+    function setMainImage(path){
+      const url = publicUrlForPath(path);
+      const main = $("mainImage");
+      main.src = url;
+      main.onload = () => {
+        $("emptyBox").style.display = "none";
+        main.style.display = "block";
+      };
+      main.onerror = () => {
+        main.style.display = "none";
+        $("emptyBox").style.display = "flex";
+        setStatus("Konnte Bild nicht laden. Prüfe Storage-Policy SELECT oder ob Bucket public ist.", "err");
+      };
+    }
+
+    // ==========================
+    // 4) Upload + DB Insert
+    // ==========================
+    const saveBtn = $("saveBtn");
+    saveBtn.addEventListener("click", async () => {
+      const dateVal = $("entryDate").value;          // YYYY-MM-DD
+      const file = $("fileInput").files?.[0];
+      const slotRaw = $("slotInput").value;
+
+      if(!dateVal){
+        setStatus("Bitte ein Datum auswählen.", "err");
+        return;
+      }
+      if(!file){
+        setStatus("Bitte ein Foto auswählen.", "err");
+        return;
+      }
+
+      // Wir speichern das Datum so, wie du es in der Liste sehen willst: "DD.MM.YYYY"
+      const entry_date = toDEDate(dateVal);
+
+      // slot optional
+      let slot = null;
+      if(slotRaw && Number.isFinite(Number(slotRaw)) && Number(slotRaw) >= 1){
+        slot = Number(slotRaw);
+      } else {
+        slot = 1;
+      }
+
+      saveBtn.disabled = true;
+      setStatus("Speichere Foto …", "");
+
+      try{
+        // 1) Upload in Storage
+        const ext = safeFileExt(file);
+        const fileId = randomId();
+        const path = `${entry_date}/${slot}_${fileId}${ext}`;
+
+        const { error: upErr } = await supabaseClient
+          .storage
+          .from(BUCKET)
+          .upload(path, file, { upsert: false, contentType: file.type });
+
+        if(upErr){
+          throw new Error("Upload fehlgeschlagen: " + upErr.message);
+        }
+
+        // 2) Insert in Tabelle entries
+        // Wichtig: file_path darf NICHT NULL sein (sonst Fehlermeldung wie bei dir).
+        const payload = { entry_date, slot, file_path: path };
+
+        const { error: insErr } = await supabaseClient
+          .from(TABLE)
+          .insert(payload);
+
+        if(insErr){
+          throw new Error("DB-Insert fehlgeschlagen: " + insErr.message);
+        }
+
+        setStatus("Gespeichert ✅", "ok");
+
+        // reset file input (damit man das gleiche Foto nochmal wählen könnte, wenn nötig)
+        $("fileInput").value = "";
+        $("slotInput").value = "";
+
+        // neu laden & direkt anzeigen
+        await fetchEntries();
+        showDate(entry_date);
+
+      } catch(e){
+        setStatus(String(e.message || e), "err");
+      } finally{
+        saveBtn.disabled = false;
+      }
+    });
+
+    // ==========================
+    // 5) Initial
+    // ==========================
+    (function init(){
+      // default: heute
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,"0");
+      const dd = String(today.getDate()).padStart(2,"0");
+      $("entryDate").value = `${yyyy}-${mm}-${dd}`;
+
+      fetchEntries();
+    })();
+  </script>
+
+  <!--
+    WICHTIG (Supabase Einstellungen, damit es ohne Login dauerhaft funktioniert):
+
+    A) Storage (Bucket: photos)
+       - Bucket "photos" auf PUBLIC setzen ODER
+       - Policies auf storage.objects:
+         * SELECT für public/anon (damit Bilder angezeigt werden können)
+         * INSERT für public/anon (damit Upload ohne Login geht)
+
+    B) Database (Tabelle: entries)
+       - RLS aktiv? Dann Policies auf public/anon:
+         * SELECT erlauben
+         * INSERT erlauben
+       - Spalten erwartet: entry_date (text), slot (int), file_path (text, NOT NULL), created_at (timestamp default now())
+  -->
 </body>
 </html>
